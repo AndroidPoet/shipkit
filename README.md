@@ -1,55 +1,75 @@
+<div align="center">
+
 # Shipkit
 
-The release cockpit for mobile apps.
+### The release cockpit for mobile apps
 
-Shipkit gives indie teams and mobile engineers one command surface for the release work that usually lives across Google Play Console, App Store Connect, RevenueCat, and CI.
+One AI-agent-friendly command surface for Google Play, App Store Connect, RevenueCat, and CI release automation.
 
-```bash
-shipkit init "My App"
-shipkit install
-shipkit doctor
-shipkit ci github
-```
-
-That is the whole idea: one front door, with the specialist tools still doing the specialist work underneath.
-
-Want the guided version instead?
+[![CI](https://github.com/AndroidPoet/shipkit/actions/workflows/ci.yml/badge.svg)](https://github.com/AndroidPoet/shipkit/actions/workflows/ci.yml)
+[![Release](https://github.com/AndroidPoet/shipkit/actions/workflows/release.yml/badge.svg)](https://github.com/AndroidPoet/shipkit/actions/workflows/release.yml)
+[![Go Reference](https://pkg.go.dev/badge/github.com/AndroidPoet/shipkit.svg)](https://pkg.go.dev/github.com/AndroidPoet/shipkit)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 ```bash
 shipkit guide
-```
-
-Want AI-compatible output for agents and automation?
-
-```bash
+shipkit install
+shipkit doctor
 shipkit agent --json
 ```
 
-## What It Does
+</div>
 
-Shipkit installs and orchestrates the CLIs that already know how to talk to each provider:
+---
 
-| Area | Tool Shipkit Uses | Binary |
+## Why Shipkit Exists
+
+Mobile release work is scattered across too many places.
+
+You need one tool for Android releases, another for iOS releases, another for subscriptions, and then CI glue to make the whole thing repeatable. Every new app recreates the same setup.
+
+Shipkit does not replace the specialist CLIs. It makes them feel like one product.
+
+| You need | Shipkit uses | Binary |
 | --- | --- | --- |
-| Android releases | [`playconsole-cli`](https://github.com/AndroidPoet/playconsole-cli) | `gpc` |
-| Subscriptions and paywalls | [`revenuecat-cli`](https://github.com/AndroidPoet/revenuecat-cli) | `rc` |
-| iOS releases and TestFlight | [`App-Store-Connect-CLI`](https://github.com/rorkai/App-Store-Connect-CLI) | `asc` |
+| Android release automation | [`playconsole-cli`](https://github.com/AndroidPoet/playconsole-cli) | `gpc` |
+| RevenueCat products, offerings, and paywalls | [`revenuecat-cli`](https://github.com/AndroidPoet/revenuecat-cli) | `rc` |
+| App Store Connect and TestFlight | [`App-Store-Connect-CLI`](https://github.com/rorkai/App-Store-Connect-CLI) | `asc` |
 
-Shipkit does not hide those tools. It makes them easier to set up, easier to verify, and easier to wire into a repeatable mobile release workflow.
+Shipkit owns the workflow. Provider CLIs own their APIs.
 
-## The Problem
+---
 
-Every serious mobile app eventually needs the same setup:
+## The Old Way
 
-- a Google Play CLI for Android bundles, tracks, release notes, and store operations
-- an App Store Connect CLI for TestFlight, builds, certificates, profiles, and app metadata
-- RevenueCat tooling for products, offerings, paywalls, metrics, and subscription checks
-- CI workflows that know which commands to run and which secrets are required
-- a repeatable way to answer: "Can this app ship today?"
+```bash
+brew tap AndroidPoet/tap
+brew install playconsole-cli
+brew install revenuecat-cli
+brew install asc
 
-The tools exist. The annoying part is connecting them every time.
+gpc setup --auto
+rc login
+asc auth login
 
-Shipkit is that connection layer.
+# Remember which commands go with which provider.
+# Rebuild CI by hand.
+# Explain all of this again to every teammate and agent.
+```
+
+## The Shipkit Way
+
+```bash
+shipkit guide
+shipkit install
+shipkit doctor
+shipkit ci github
+shipkit agent --json
+```
+
+Readable for humans. Structured for agents. Small enough to trust.
+
+---
 
 ## Install
 
@@ -74,55 +94,134 @@ go install github.com/AndroidPoet/shipkit/cmd/shipkit@latest
 curl -fsSL https://raw.githubusercontent.com/AndroidPoet/shipkit/main/install.sh | sh
 ```
 
-Custom install directory:
+Custom directory:
 
 ```bash
 INSTALL_DIR="$HOME/.local/bin" sh -c "$(curl -fsSL https://raw.githubusercontent.com/AndroidPoet/shipkit/main/install.sh)"
 ```
 
+---
+
 ## Quick Start
 
-Create project config:
-
-```bash
-shipkit init "My App"
-```
-
-Or use the interactive guide:
+Start with the guided flow:
 
 ```bash
 shipkit guide
 ```
 
-Install the underlying mobile release CLIs:
+Example:
+
+```text
+Shipkit Guide
+Answer a few questions and Shipkit will give you the shortest setup path.
+
+App name [My App]: LaunchKit
+Platforms (both/android/ios) [both]: both
+Use RevenueCat (yes/no) [yes]: yes
+CI provider (github/local) [github]: github
+
+Recommended setup
+  shipkit init "LaunchKit"
+  shipkit install
+  shipkit doctor
+  shipkit ci github
+
+Provider auth
+  gpc setup --auto
+  rc login
+  asc auth login
+
+Release commands
+  shipkit release android
+  shipkit release ios
+  shipkit release all
+```
+
+Or run the commands directly:
 
 ```bash
+shipkit init "LaunchKit"
 shipkit install
-```
-
-Check local readiness:
-
-```bash
 shipkit doctor
-```
-
-Generate GitHub Actions:
-
-```bash
 shipkit ci github
 ```
 
-Run a release:
+---
+
+## Commands
+
+| Command | Purpose |
+| --- | --- |
+| `shipkit guide` | Interactive setup guide |
+| `shipkit agent --json` | AI-agent-friendly project context |
+| `shipkit install` | Install `gpc`, `rc`, and `asc` under the hood |
+| `shipkit init "My App"` | Create `.shipkit.yaml` |
+| `shipkit doctor` | Check local tool readiness |
+| `shipkit ci github` | Generate a GitHub Actions workflow |
+| `shipkit release android` | Run Android release flow through `gpc` |
+| `shipkit release ios` | Run iOS release flow through `asc` |
+| `shipkit release all` | Run Android then iOS release flows |
+| `shipkit launch-check` | Check launch readiness |
+| `shipkit version` | Print build metadata |
+
+---
+
+## AI-Agent-Friendly Output
+
+Shipkit does not call an AI API. It does not need an API key. It does not send your project data anywhere.
+
+Instead, it exposes deterministic context that AI agents, scripts, and CI can parse:
 
 ```bash
-shipkit release android
-shipkit release ios
-shipkit release all
+shipkit agent --json
 ```
 
-## Under The Hood
+Example:
 
-`shipkit install` currently maps to:
+```json
+{
+  "schema_version": "1",
+  "goal": "Make mobile release setup deterministic for humans and AI agents.",
+  "tools": [
+    {
+      "name": "Google Play Console CLI",
+      "command": "gpc",
+      "installed": true,
+      "path": "/opt/homebrew/bin/gpc",
+      "install_url": "https://github.com/AndroidPoet/playconsole-cli"
+    }
+  ],
+  "config": {
+    "file": ".shipkit.yaml",
+    "present": false
+  },
+  "next_actions": [
+    "shipkit init \"My App\"",
+    "shipkit doctor",
+    "gpc setup --auto",
+    "rc login",
+    "asc auth login",
+    "shipkit ci github"
+  ]
+}
+```
+
+This is the useful AI integration: predictable CLI responses that external agents can understand.
+
+---
+
+## What `shipkit install` Does
+
+Shipkit checks for the executable names first:
+
+```text
+gpc
+rc
+asc
+```
+
+If any are missing, it installs the underlying CLIs with Homebrew:
 
 ```bash
 brew tap AndroidPoet/tap
@@ -131,9 +230,7 @@ brew install revenuecat-cli
 brew install asc
 ```
 
-Shipkit checks whether `gpc`, `rc`, and `asc` already exist on your `PATH` before installing anything.
-
-After install, authenticate the provider CLIs directly:
+Then authenticate each provider CLI directly:
 
 ```bash
 gpc setup --auto
@@ -141,17 +238,23 @@ rc login
 asc auth login
 ```
 
-Then use Shipkit as the daily workflow layer.
+Shipkit keeps the provider auth flows in the provider tools where they belong.
 
-## Config
+---
 
-`shipkit init "My App"` creates `.shipkit.yaml`:
+## Project Config
+
+```bash
+shipkit init "LaunchKit"
+```
+
+Creates:
 
 ```yaml
 app:
-  name: "My App"
-  ios_bundle_id: "com.company.myapp"
-  android_package: "com.company.myapp"
+  name: "LaunchKit"
+  ios_bundle_id: "com.company.launchkit"
+  android_package: "com.company.launchkit"
 
 tools:
   google_play: gpc
@@ -164,81 +267,13 @@ release:
   revenuecat_enabled: true
 ```
 
-The first version writes sensible defaults. Future releases will read this file to drive release tracks, TestFlight behavior, RevenueCat checks, metadata paths, and CI secret validation.
+The config starts small on purpose. It will become the source of truth for release tracks, TestFlight behavior, RevenueCat checks, metadata paths, and CI secret validation.
 
-## Commands
+---
 
-### `shipkit version`
+## GitHub Actions
 
-```bash
-shipkit version
-```
-
-Prints build metadata. Homebrew uses this for formula testing.
-
-### `shipkit install`
-
-```bash
-shipkit install
-```
-
-Installs missing provider CLIs through Homebrew.
-
-### `shipkit guide`
-
-```bash
-shipkit guide
-```
-
-Starts an interactive setup guide:
-
-```text
-Shipkit Guide
-Answer a few questions and Shipkit will give you the shortest setup path.
-
-App name [My App]:
-Platforms (both/android/ios) [both]:
-Use RevenueCat (yes/no) [yes]:
-CI provider (github/local) [github]:
-```
-
-Then it prints the exact commands for your setup, including provider auth and release commands.
-
-### `shipkit agent`
-
-```bash
-shipkit agent
-shipkit agent --json
-```
-
-Prints deterministic local context for AI agents, scripts, and CI.
-
-No API key. No network call. No model dependency.
-
-JSON output includes:
-
-- installed tool status
-- missing tool status
-- config presence
-- exact next actions
-
-### `shipkit init`
-
-```bash
-shipkit init "My App"
-```
-
-Creates `.shipkit.yaml`.
-
-### `shipkit doctor`
-
-```bash
-shipkit doctor
-```
-
-Checks whether the required provider CLIs are installed and shows the next auth commands.
-
-### `shipkit ci github`
+Generate a starter workflow:
 
 ```bash
 shipkit ci github
@@ -250,9 +285,26 @@ Creates:
 .github/workflows/mobile-release.yml
 ```
 
-The generated workflow installs Shipkit, checks the release tooling, and runs `shipkit release`.
+The generated workflow:
 
-### `shipkit release`
+- installs Shipkit
+- checks local release tooling
+- runs `shipkit release` for `android`, `ios`, or `all`
+
+Manual dispatch input:
+
+```yaml
+platform:
+  type: choice
+  options:
+    - all
+    - android
+    - ios
+```
+
+---
+
+## Release Commands
 
 ```bash
 shipkit release android
@@ -260,43 +312,73 @@ shipkit release ios
 shipkit release all
 ```
 
-Current default command mapping:
+Current mapping:
 
 ```bash
 shipkit release android  # gpc release --track internal
 shipkit release ios      # asc testflight upload
 ```
 
-These are intentionally thin wrappers. Advanced users can still run `gpc`, `rc`, or `asc` directly whenever they need full provider control.
+These are deliberately thin wrappers. Advanced users can always drop down to `gpc`, `rc`, or `asc` directly.
 
-### `shipkit launch-check`
+---
+
+## Launch Readiness
 
 ```bash
 shipkit launch-check
 ```
 
-Checks whether the local project has Shipkit config and required tooling.
-
-The direction for this command is the most important part of the product:
+The product direction is to answer one question:
 
 ```text
-Can this mobile app ship today?
+Can this app ship today?
 ```
 
-Future checks should cover:
+Planned checks:
 
-- Android package name matches Play setup
+- Android package name matches Play Console setup
 - iOS bundle ID matches App Store Connect setup
 - RevenueCat product IDs exist for both stores
 - CI secrets are present
 - release notes exist
 - store metadata exists
 - screenshots are present
-- internal track or TestFlight release target is configured
+- internal track or TestFlight target is configured
+- output is available as text and JSON
 
-## GitHub Release Setup
+---
 
-The repo ships with:
+## Environment
+
+Shipkit itself does not require secrets for local status checks.
+
+Provider tools may require their own credentials:
+
+| Tool | Typical auth command |
+| --- | --- |
+| `gpc` | `gpc setup --auto` |
+| `rc` | `rc login` |
+| `asc` | `asc auth login` |
+
+CI workflows should store provider credentials in GitHub Actions secrets. Shipkit will add explicit secret validation in a future release.
+
+---
+
+## Security Model
+
+- No AI API calls
+- No telemetry
+- No provider credentials stored by Shipkit
+- No hidden network calls in `shipkit agent --json`
+- Provider auth remains inside the provider CLIs
+- Generated CI workflows are visible files you can review
+
+---
+
+## Repository Release Setup
+
+This repo ships with release automation:
 
 ```text
 .github/workflows/ci.yml
@@ -304,6 +386,7 @@ The repo ships with:
 .goreleaser.yml
 Makefile
 install.sh
+LICENSE
 ```
 
 Local checks:
@@ -341,30 +424,7 @@ That token must be able to push to:
 AndroidPoet/homebrew-tap
 ```
 
-## Homebrew Formula
-
-GoReleaser generates the formula automatically:
-
-```yaml
-brews:
-  - name: shipkit
-    repository:
-      owner: AndroidPoet
-      name: homebrew-tap
-```
-
-Expected install after release:
-
-```bash
-brew tap AndroidPoet/tap
-brew install shipkit
-```
-
-Formula smoke test:
-
-```bash
-shipkit version
-```
+---
 
 ## Architecture
 
@@ -374,6 +434,12 @@ cmd/shipkit
 
 internal/cli
   cli.go               command routing and user-facing behavior
+
+internal/agent
+  agent.go             deterministic context for AI agents and scripts
+
+internal/guide
+  guide.go             interactive setup wizard
 
 internal/install
   install.go           Homebrew-backed install orchestration
@@ -391,39 +457,36 @@ internal/runner
   runner.go            command execution boundary
 ```
 
-The code intentionally stays small:
+Small codebase. Clear boundaries. No duplicate provider API clients.
 
-- no duplicate Google Play API client
-- no duplicate RevenueCat API client
-- no duplicate App Store Connect API client
-- no framework-heavy CLI abstraction
-- no hidden magic when direct provider commands are better
+---
 
-## Product Direction
+## Roadmap
 
-Shipkit should become the release readiness layer for mobile apps.
+- `shipkit doctor --json`
+- `shipkit launch-check --json`
+- provider auth validation, not only executable checks
+- GitHub secret checklist generation
+- release commands driven by `.shipkit.yaml`
+- RevenueCat product consistency checks across iOS and Android
+- store metadata and screenshot readiness checks
+- CI summary comments for release readiness
 
-Near-term:
-
-- read `.shipkit.yaml` during release commands
-- validate provider auth status, not just executable presence
-- generate GitHub secret checklists
-- add `shipkit doctor --json`
-- add `shipkit launch-check --json`
-
-High-value:
-
-- compare RevenueCat product IDs against App Store and Play Store products
-- validate Android and iOS bundle identifiers
-- verify TestFlight group and Play internal track readiness
-- check release notes and metadata paths
-- generate a complete launch report for CI comments
+---
 
 ## Philosophy
 
-Shipkit owns the workflow. Provider CLIs own their APIs.
+Shipkit should feel like the missing control panel for mobile release work.
 
-That is the architecture. That is the product.
+It should be:
+
+- easy for humans
+- predictable for scripts
+- parseable for agents
+- small enough to audit
+- flexible enough to step aside when the provider CLI is the better tool
+
+---
 
 ## License
 
