@@ -1,0 +1,75 @@
+version: 2
+
+project_name: shipkit
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: shipkit
+    main: ./cmd/shipkit
+    binary: shipkit
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - darwin
+      - linux
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+      - -X main.version={{.Version}}
+      - -X main.commit={{.Commit}}
+      - -X main.date={{.Date}}
+
+archives:
+  - id: default
+    formats:
+      - tar.gz
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- .Version }}_
+      {{- .Os }}_
+      {{- .Arch }}
+
+checksum:
+  name_template: checksums.txt
+
+snapshot:
+  version_template: "{{ incpatch .Version }}-next"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+
+brews:
+  - name: shipkit
+    repository:
+      owner: AndroidPoet
+      name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
+    homepage: https://github.com/AndroidPoet/shipkit
+    description: One command layer for mobile app release tooling
+    license: MIT
+    directory: Formula
+    install: |
+      bin.install "shipkit"
+    test: |
+      system "#{bin}/shipkit", "version"
+
+release:
+  github:
+    owner: AndroidPoet
+    name: shipkit
+  footer: |
+    ## Install
+
+    ```bash
+    brew tap AndroidPoet/tap
+    brew install shipkit
+    ```

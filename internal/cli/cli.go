@@ -14,17 +14,26 @@ import (
 	"github.com/AndroidPoet/shipkit/internal/workflow"
 )
 
-func Run(args []string, stdout, stderr io.Writer) error {
-	return runWith(context.Background(), runner.ExecRunner{}, args, stdout, stderr)
+type BuildInfo struct {
+	Version string
+	Commit  string
+	Date    string
 }
 
-func runWith(ctx context.Context, r runner.Runner, args []string, stdout, stderr io.Writer) error {
+func Run(args []string, stdout, stderr io.Writer, build BuildInfo) error {
+	return runWith(context.Background(), runner.ExecRunner{}, args, stdout, stderr, build)
+}
+
+func runWith(ctx context.Context, r runner.Runner, args []string, stdout, stderr io.Writer, build BuildInfo) error {
 	if len(args) == 0 || args[0] == "help" || args[0] == "--help" || args[0] == "-h" {
 		printHelp(stdout)
 		return nil
 	}
 
 	switch args[0] {
+	case "version":
+		fmt.Fprintf(stdout, "shipkit %s (commit %s, built %s)\n", build.Version, build.Commit, build.Date)
+		return nil
 	case "install":
 		return install.Run(ctx, r, stdout, stderr)
 	case "init":
@@ -88,9 +97,14 @@ func release(ctx context.Context, r runner.Runner, args []string, stdout, stderr
 }
 
 func printHelp(stdout io.Writer) {
-	fmt.Fprint(stdout, `shipkit makes mobile release tooling feel like one command.
+	fmt.Fprint(stdout, `Shipkit
+  The release cockpit for mobile apps.
+
+  One command surface for Google Play, App Store Connect, RevenueCat,
+  and the CI glue that makes releases repeatable.
 
 Usage:
+  shipkit version            Print build information
   shipkit install            Install gpc, rc, and asc under the hood
   shipkit init [app name]    Create .shipkit.yaml
   shipkit doctor             Check required tools
@@ -99,6 +113,12 @@ Usage:
   shipkit release ios        Run the iOS release flow through asc
   shipkit release all        Run Android then iOS release flows
   shipkit launch-check       Check local launch readiness
+
+Start:
+  shipkit init "My App"
+  shipkit install
+  shipkit doctor
+  shipkit ci github
 
 `)
 }

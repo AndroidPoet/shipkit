@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 )
 
-const releaseWorkflow = `name: Mobile Release
+const releaseWorkflow = `name: Shipkit Mobile Release
 
 on:
   workflow_dispatch:
@@ -21,15 +21,30 @@ on:
           - ios
 
 jobs:
-  release:
+  readiness:
+    name: Release readiness
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
       - name: Install Shipkit
-        run: |
-          go install github.com/AndroidPoet/shipkit/cmd/shipkit@latest
-      - name: Check tools
+        run: go install github.com/AndroidPoet/shipkit/cmd/shipkit@latest
+      - name: Check release cockpit
         run: shipkit doctor
+
+  release:
+    name: Release ${{ inputs.platform }}
+    runs-on: macos-latest
+    needs: readiness
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+      - name: Install Shipkit
+        run: go install github.com/AndroidPoet/shipkit/cmd/shipkit@latest
       - name: Release
         run: shipkit release "${{ inputs.platform }}"
 `
