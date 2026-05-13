@@ -1,0 +1,3 @@
+/shipkit
+*.test
+.shipkit.yaml
