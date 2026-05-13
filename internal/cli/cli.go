@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/AndroidPoet/shipkit/internal/ai"
+	"github.com/AndroidPoet/shipkit/internal/agent"
 	"github.com/AndroidPoet/shipkit/internal/config"
 	"github.com/AndroidPoet/shipkit/internal/doctor"
 	"github.com/AndroidPoet/shipkit/internal/guide"
@@ -39,8 +39,8 @@ func runWith(ctx context.Context, r runner.Runner, args []string, stdin io.Reade
 	case "guide":
 		_, err := guide.Run(stdin, stdout)
 		return err
-	case "ai":
-		return ai.Run(ctx, r, stdout)
+	case "agent":
+		return agent.Print(ctx, r, stdout, hasFlag(args[1:], "--json"))
 	case "install":
 		return install.Run(ctx, r, stdout, stderr)
 	case "init":
@@ -113,7 +113,7 @@ func printHelp(stdout io.Writer) {
 Usage:
   shipkit version            Print build information
   shipkit guide              Interactive setup guide
-  shipkit ai                 AI release copilot for local status
+  shipkit agent [--json]     AI-agent-friendly local context
   shipkit install            Install gpc, rc, and asc under the hood
   shipkit init [app name]    Create .shipkit.yaml
   shipkit doctor             Check required tools
@@ -130,4 +130,13 @@ Start:
   shipkit ci github
 
 `)
+}
+
+func hasFlag(args []string, flag string) bool {
+	for _, arg := range args {
+		if arg == flag {
+			return true
+		}
+	}
+	return false
 }

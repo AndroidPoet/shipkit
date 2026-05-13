@@ -19,10 +19,10 @@ Want the guided version instead?
 shipkit guide
 ```
 
-Want Shipkit to read your local status and explain what to do next?
+Want AI-compatible output for agents and automation?
 
 ```bash
-shipkit ai
+shipkit agent --json
 ```
 
 ## What It Does
@@ -204,24 +204,23 @@ CI provider (github/local) [github]:
 
 Then it prints the exact commands for your setup, including provider auth and release commands.
 
-### `shipkit ai`
+### `shipkit agent`
 
 ```bash
-shipkit ai
+shipkit agent
+shipkit agent --json
 ```
 
-Reads local Shipkit status and gives next steps.
+Prints deterministic local context for AI agents, scripts, and CI.
 
-Without an API key, it stays local and prints deterministic guidance.
+No API key. No network call. No model dependency.
 
-With an API key, it asks OpenAI for a concise setup/release plan:
+JSON output includes:
 
-```bash
-export OPENAI_API_KEY="sk-..."
-shipkit ai
-```
-
-This keeps the base CLI useful without AI, while making the guided mode smarter for teams that want an interactive release copilot.
+- installed tool status
+- missing tool status
+- config presence
+- exact next actions
 
 ### `shipkit init`
 
