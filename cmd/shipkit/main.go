@@ -14,7 +14,7 @@ var (
 )
 
 func main() {
-	if err := cli.Run(os.Args[1:], os.Stdout, os.Stderr, cli.BuildInfo{
+	if err := cli.Run(os.Args[1:], os.Stdin, os.Stdout, os.Stderr, cli.BuildInfo{
 		Version: version,
 		Commit:  commit,
 		Date:    date,

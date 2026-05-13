@@ -7,8 +7,10 @@ import (
 	"os"
 	"strings"
 
+	"github.com/AndroidPoet/shipkit/internal/ai"
 	"github.com/AndroidPoet/shipkit/internal/config"
 	"github.com/AndroidPoet/shipkit/internal/doctor"
+	"github.com/AndroidPoet/shipkit/internal/guide"
 	"github.com/AndroidPoet/shipkit/internal/install"
 	"github.com/AndroidPoet/shipkit/internal/runner"
 	"github.com/AndroidPoet/shipkit/internal/workflow"
@@ -20,11 +22,11 @@ type BuildInfo struct {
 	Date    string
 }
 
-func Run(args []string, stdout, stderr io.Writer, build BuildInfo) error {
-	return runWith(context.Background(), runner.ExecRunner{}, args, stdout, stderr, build)
+func Run(args []string, stdin io.Reader, stdout, stderr io.Writer, build BuildInfo) error {
+	return runWith(context.Background(), runner.ExecRunner{}, args, stdin, stdout, stderr, build)
 }
 
-func runWith(ctx context.Context, r runner.Runner, args []string, stdout, stderr io.Writer, build BuildInfo) error {
+func runWith(ctx context.Context, r runner.Runner, args []string, stdin io.Reader, stdout, stderr io.Writer, build BuildInfo) error {
 	if len(args) == 0 || args[0] == "help" || args[0] == "--help" || args[0] == "-h" {
 		printHelp(stdout)
 		return nil
@@ -34,6 +36,11 @@ func runWith(ctx context.Context, r runner.Runner, args []string, stdout, stderr
 	case "version":
 		fmt.Fprintf(stdout, "shipkit %s (commit %s, built %s)\n", build.Version, build.Commit, build.Date)
 		return nil
+	case "guide":
+		_, err := guide.Run(stdin, stdout)
+		return err
+	case "ai":
+		return ai.Run(ctx, r, stdout)
 	case "install":
 		return install.Run(ctx, r, stdout, stderr)
 	case "init":
@@ -105,6 +112,8 @@ func printHelp(stdout io.Writer) {
 
 Usage:
   shipkit version            Print build information
+  shipkit guide              Interactive setup guide
+  shipkit ai                 AI release copilot for local status
   shipkit install            Install gpc, rc, and asc under the hood
   shipkit init [app name]    Create .shipkit.yaml
   shipkit doctor             Check required tools

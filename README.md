@@ -13,6 +13,18 @@ shipkit ci github
 
 That is the whole idea: one front door, with the specialist tools still doing the specialist work underneath.
 
+Want the guided version instead?
+
+```bash
+shipkit guide
+```
+
+Want Shipkit to read your local status and explain what to do next?
+
+```bash
+shipkit ai
+```
+
 ## What It Does
 
 Shipkit installs and orchestrates the CLIs that already know how to talk to each provider:
@@ -74,6 +86,12 @@ Create project config:
 
 ```bash
 shipkit init "My App"
+```
+
+Or use the interactive guide:
+
+```bash
+shipkit guide
 ```
 
 Install the underlying mobile release CLIs:
@@ -165,6 +183,45 @@ shipkit install
 ```
 
 Installs missing provider CLIs through Homebrew.
+
+### `shipkit guide`
+
+```bash
+shipkit guide
+```
+
+Starts an interactive setup guide:
+
+```text
+Shipkit Guide
+Answer a few questions and Shipkit will give you the shortest setup path.
+
+App name [My App]:
+Platforms (both/android/ios) [both]:
+Use RevenueCat (yes/no) [yes]:
+CI provider (github/local) [github]:
+```
+
+Then it prints the exact commands for your setup, including provider auth and release commands.
+
+### `shipkit ai`
+
+```bash
+shipkit ai
+```
+
+Reads local Shipkit status and gives next steps.
+
+Without an API key, it stays local and prints deterministic guidance.
+
+With an API key, it asks OpenAI for a concise setup/release plan:
+
+```bash
+export OPENAI_API_KEY="sk-..."
+shipkit ai
+```
+
+This keeps the base CLI useful without AI, while making the guided mode smarter for teams that want an interactive release copilot.
 
 ### `shipkit init`
 

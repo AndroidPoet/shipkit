@@ -30,7 +30,7 @@ func Test_Run_doctorReportsMissingTools(t *testing.T) {
 	var stdout bytes.Buffer
 	r := &fakeRunner{paths: map[string]string{"gpc": "/bin/gpc"}}
 
-	err := runWith(context.Background(), r, []string{"doctor"}, &stdout, io.Discard, BuildInfo{})
+	err := runWith(context.Background(), r, []string{"doctor"}, strings.NewReader(""), &stdout, io.Discard, BuildInfo{})
 
 	if err == nil {
 		t.Fatal("expected doctor to fail when tools are missing")
@@ -44,7 +44,7 @@ func Test_Run_releaseAllRunsAndroidThenIOS(t *testing.T) {
 	var stdout bytes.Buffer
 	r := &fakeRunner{}
 
-	err := runWith(context.Background(), r, []string{"release", "all"}, &stdout, io.Discard, BuildInfo{})
+	err := runWith(context.Background(), r, []string{"release", "all"}, strings.NewReader(""), &stdout, io.Discard, BuildInfo{})
 
 	if err != nil {
 		t.Fatal(err)
