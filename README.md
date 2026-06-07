@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="art/logo.svg" width="800" alt="Shipkit">
+
 # Shipkit
 
 ### The release cockpit for mobile apps
