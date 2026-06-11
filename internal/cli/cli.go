@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"os"
 	"strings"
 
 	"github.com/AndroidPoet/shipkit/internal/agent"
@@ -12,6 +11,7 @@ import (
 	"github.com/AndroidPoet/shipkit/internal/doctor"
 	"github.com/AndroidPoet/shipkit/internal/guide"
 	"github.com/AndroidPoet/shipkit/internal/install"
+	"github.com/AndroidPoet/shipkit/internal/launch"
 	"github.com/AndroidPoet/shipkit/internal/runner"
 	"github.com/AndroidPoet/shipkit/internal/workflow"
 )
@@ -55,6 +55,9 @@ func runWith(ctx context.Context, r runner.Runner, args []string, stdin io.Reade
 		fmt.Fprintf(stdout, "Created %s\n", path)
 		return nil
 	case "doctor":
+		if hasFlag(args[1:], "--json") {
+			return doctor.PrintJSON(ctx, r, stdout)
+		}
 		return doctor.Print(ctx, r, stdout)
 	case "ci":
 		if len(args) < 2 || args[1] != "github" {
@@ -69,38 +72,60 @@ func runWith(ctx context.Context, r runner.Runner, args []string, stdin io.Reade
 	case "release":
 		return release(ctx, r, args[1:], stdout, stderr)
 	case "launch-check":
-		if err := doctor.Print(ctx, r, stdout); err != nil {
-			return err
-		}
-		_, err := os.Stat(config.FileName)
-		if err != nil {
-			return fmt.Errorf("%s missing; run `shipkit init`", config.FileName)
-		}
-		fmt.Fprintln(stdout, "Launch config found.")
-		return nil
+		return launch.Print(ctx, r, stdout, hasFlag(args[1:], "--json"))
 	default:
 		return fmt.Errorf("unknown command %q", args[0])
 	}
 }
 
+const releaseUsage = "usage: shipkit release android|ios|all [--dry-run]"
+
+// releaseCommands maps a release target to the ordered provider commands it runs.
+// Keeping it as data (rather than inline calls) lets `--dry-run` preview the exact
+// commands and lets tests assert the mapping without executing anything.
+func releaseCommands(target string) ([][]string, error) {
+	switch target {
+	case "android":
+		return [][]string{{"gpc", "release", "--track", "internal"}}, nil
+	case "ios":
+		return [][]string{{"asc", "testflight", "upload"}}, nil
+	case "all":
+		android, _ := releaseCommands("android")
+		ios, _ := releaseCommands("ios")
+		return append(android, ios...), nil
+	default:
+		return nil, fmt.Errorf(releaseUsage)
+	}
+}
+
 func release(ctx context.Context, r runner.Runner, args []string, stdout, stderr io.Writer) error {
-	if len(args) != 1 {
-		return fmt.Errorf("usage: shipkit release android|ios|all")
+	dryRun := hasFlag(args, "--dry-run")
+
+	targets := make([]string, 0, len(args))
+	for _, arg := range args {
+		if !strings.HasPrefix(arg, "-") {
+			targets = append(targets, arg)
+		}
+	}
+	if len(targets) != 1 {
+		return fmt.Errorf(releaseUsage)
 	}
 
-	switch args[0] {
-	case "android":
-		return r.Run(ctx, stdout, stderr, "gpc", "release", "--track", "internal")
-	case "ios":
-		return r.Run(ctx, stdout, stderr, "asc", "testflight", "upload")
-	case "all":
-		if err := release(ctx, r, []string{"android"}, stdout, stderr); err != nil {
+	commands, err := releaseCommands(targets[0])
+	if err != nil {
+		return err
+	}
+
+	for _, command := range commands {
+		if dryRun {
+			fmt.Fprintf(stdout, "[dry-run] %s\n", strings.Join(command, " "))
+			continue
+		}
+		if err := r.Run(ctx, stdout, stderr, command[0], command[1:]...); err != nil {
 			return err
 		}
-		return release(ctx, r, []string{"ios"}, stdout, stderr)
-	default:
-		return fmt.Errorf("usage: shipkit release android|ios|all")
 	}
+	return nil
 }
 
 func printHelp(stdout io.Writer) {
@@ -116,12 +141,13 @@ Usage:
   shipkit agent [--json]     AI-agent-friendly local context
   shipkit install            Install gpc, rc, and asc under the hood
   shipkit init [app name]    Create .shipkit.yaml
-  shipkit doctor             Check required tools
+  shipkit doctor [--json]    Check required tools
   shipkit ci github          Generate a GitHub Actions release workflow
   shipkit release android    Run the Android release flow through gpc
   shipkit release ios        Run the iOS release flow through asc
   shipkit release all        Run Android then iOS release flows
-  shipkit launch-check       Check local launch readiness
+  shipkit release ... --dry-run  Print the provider commands without running them
+  shipkit launch-check [--json]  Check local launch readiness
 
 Start:
   shipkit init "My App"

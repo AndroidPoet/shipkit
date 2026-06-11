@@ -157,12 +157,13 @@ shipkit ci github
 | `shipkit agent --json` | AI-agent-friendly project context |
 | `shipkit install` | Install `gpc`, `rc`, and `asc` under the hood |
 | `shipkit init "My App"` | Create `.shipkit.yaml` |
-| `shipkit doctor` | Check local tool readiness |
+| `shipkit doctor [--json]` | Check local tool readiness |
 | `shipkit ci github` | Generate a GitHub Actions workflow |
 | `shipkit release android` | Run Android release flow through `gpc` |
 | `shipkit release ios` | Run iOS release flow through `asc` |
 | `shipkit release all` | Run Android then iOS release flows |
-| `shipkit launch-check` | Check launch readiness |
+| `shipkit release ... --dry-run` | Print the provider commands without running them |
+| `shipkit launch-check [--json]` | Check launch readiness |
 | `shipkit version` | Print build metadata |
 
 ---
@@ -288,6 +289,7 @@ Creates:
 The generated workflow:
 
 - installs Shipkit
+- installs the provider CLIs (`gpc`, `rc`, `asc`) via `shipkit install`
 - checks local release tooling
 - runs `shipkit release` for `android`, `ios`, or `all`
 
@@ -321,31 +323,45 @@ shipkit release ios      # asc testflight upload
 
 These are deliberately thin wrappers. Advanced users can always drop down to `gpc`, `rc`, or `asc` directly.
 
+Preview before you ship — `--dry-run` prints the exact provider commands without executing them:
+
+```bash
+shipkit release all --dry-run
+# [dry-run] gpc release --track internal
+# [dry-run] asc testflight upload
+```
+
 ---
 
 ## Launch Readiness
 
 ```bash
 shipkit launch-check
+shipkit launch-check --json
 ```
 
-The product direction is to answer one question:
+It answers one question:
 
 ```text
 Can this app ship today?
 ```
 
-Planned checks:
+Checks today (verifiable locally, text or JSON, non-zero exit when not ready):
+
+- provider CLIs (`gpc`, `rc`, `asc`) are installed
+- `.shipkit.yaml` exists and is readable
+- app name is set
+- iOS bundle ID is set and not the generated `com.company.*` placeholder
+- Android package is set and not the generated `com.company.*` placeholder
+
+Planned checks (require store/network access):
 
 - Android package name matches Play Console setup
 - iOS bundle ID matches App Store Connect setup
 - RevenueCat product IDs exist for both stores
 - CI secrets are present
-- release notes exist
-- store metadata exists
-- screenshots are present
+- release notes, store metadata, and screenshots exist
 - internal track or TestFlight target is configured
-- output is available as text and JSON
 
 ---
 
@@ -445,7 +461,10 @@ internal/install
   install.go           Homebrew-backed install orchestration
 
 internal/doctor
-  doctor.go            local tool readiness checks
+  doctor.go            local tool readiness checks (text and JSON)
+
+internal/launch
+  launch.go            launch-readiness evaluation (text and JSON)
 
 internal/config
   config.go            .shipkit.yaml rendering
@@ -463,11 +482,9 @@ Small codebase. Clear boundaries. No duplicate provider API clients.
 
 ## Roadmap
 
-- `shipkit doctor --json`
-- `shipkit launch-check --json`
 - provider auth validation, not only executable checks
 - GitHub secret checklist generation
-- release commands driven by `.shipkit.yaml`
+- release commands driven by `.shipkit.yaml` (tracks, TestFlight target)
 - RevenueCat product consistency checks across iOS and Android
 - store metadata and screenshot readiness checks
 - CI summary comments for release readiness

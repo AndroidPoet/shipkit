@@ -54,3 +54,33 @@ func Test_Run_releaseAllRunsAndroidThenIOS(t *testing.T) {
 		t.Fatalf("runs = %#v", r.runs)
 	}
 }
+
+func Test_Run_releaseDryRunExecutesNothing(t *testing.T) {
+	var stdout bytes.Buffer
+	r := &fakeRunner{}
+
+	err := runWith(context.Background(), r, []string{"release", "all", "--dry-run"}, strings.NewReader(""), &stdout, io.Discard, BuildInfo{})
+
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(r.runs) != 0 {
+		t.Fatalf("dry-run must not execute any command, got %#v", r.runs)
+	}
+	out := stdout.String()
+	for _, want := range []string{
+		"[dry-run] gpc release --track internal",
+		"[dry-run] asc testflight upload",
+	} {
+		if !strings.Contains(out, want) {
+			t.Fatalf("dry-run output missing %q:\n%s", want, out)
+		}
+	}
+}
+
+func Test_Run_releaseRejectsUnknownTarget(t *testing.T) {
+	err := runWith(context.Background(), &fakeRunner{}, []string{"release", "windows"}, strings.NewReader(""), io.Discard, io.Discard, BuildInfo{})
+	if err == nil {
+		t.Fatal("expected error for unknown release target")
+	}
+}

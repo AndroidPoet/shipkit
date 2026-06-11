@@ -19,7 +19,10 @@ if [ "$version" = "latest" ]; then
   version="$(curl -fsSL "https://api.github.com/repos/$repo/releases/latest" | sed -n 's/.*"tag_name": *"\([^"]*\)".*/\1/p' | head -n 1)"
 fi
 
-archive="${bin_name}_${version}_${os}_${arch}.tar.gz"
+# GoReleaser strips the leading "v" from the archive name (.Version), but the
+# release tag and download path keep it (.Tag). Mirror that split here.
+archive_version="${version#v}"
+archive="${bin_name}_${archive_version}_${os}_${arch}.tar.gz"
 url="https://github.com/$repo/releases/download/$version/$archive"
 tmp="$(mktemp -d)"
 
