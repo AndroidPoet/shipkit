@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 
+	"github.com/AndroidPoet/shipkit/internal/config"
 	"github.com/AndroidPoet/shipkit/internal/doctor"
 	"github.com/AndroidPoet/shipkit/internal/runner"
 )
@@ -52,7 +53,7 @@ func BuildContext(ctx context.Context, r runner.Runner) Context {
 	}
 
 	configPresent := false
-	if _, err := os.Stat(".shipkit.yaml"); err == nil {
+	if _, err := os.Stat(config.FileName); err == nil {
 		configPresent = true
 	}
 
@@ -73,7 +74,7 @@ func BuildContext(ctx context.Context, r runner.Runner) Context {
 		Goal:          "Make mobile release setup deterministic for humans and AI agents.",
 		Tools:         tools,
 		Config: ConfigStatus{
-			File:    ".shipkit.yaml",
+			File:    config.FileName,
 			Present: configPresent,
 		},
 		NextActions: nextActions,
@@ -81,17 +82,17 @@ func BuildContext(ctx context.Context, r runner.Runner) Context {
 }
 
 func Print(ctx context.Context, r runner.Runner, stdout io.Writer, jsonOutput bool) error {
-	context := BuildContext(ctx, r)
+	agentCtx := BuildContext(ctx, r)
 	if jsonOutput {
 		encoder := json.NewEncoder(stdout)
 		encoder.SetIndent("", "  ")
-		return encoder.Encode(context)
+		return encoder.Encode(agentCtx)
 	}
 
 	fmt.Fprintln(stdout, "Shipkit Agent Context")
 	fmt.Fprintln(stdout)
 	fmt.Fprintln(stdout, "Tools:")
-	for _, tool := range context.Tools {
+	for _, tool := range agentCtx.Tools {
 		if tool.Installed {
 			fmt.Fprintf(stdout, "- %s (%s): installed at %s\n", tool.Name, tool.Command, tool.Path)
 		} else {
@@ -99,10 +100,10 @@ func Print(ctx context.Context, r runner.Runner, stdout io.Writer, jsonOutput bo
 		}
 	}
 	fmt.Fprintln(stdout)
-	fmt.Fprintf(stdout, "Config: %s present=%t\n", context.Config.File, context.Config.Present)
+	fmt.Fprintf(stdout, "Config: %s present=%t\n", agentCtx.Config.File, agentCtx.Config.Present)
 	fmt.Fprintln(stdout)
 	fmt.Fprintln(stdout, "Next actions:")
-	for _, action := range context.NextActions {
+	for _, action := range agentCtx.NextActions {
 		fmt.Fprintf(stdout, "- %s\n", action)
 	}
 	return nil

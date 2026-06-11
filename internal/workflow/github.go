@@ -31,6 +31,8 @@ jobs:
           go-version: stable
       - name: Install Shipkit
         run: go install github.com/AndroidPoet/shipkit/cmd/shipkit@latest
+      - name: Install release tools
+        run: shipkit install
       - name: Check release cockpit
         run: shipkit doctor
 
@@ -45,6 +47,8 @@ jobs:
           go-version: stable
       - name: Install Shipkit
         run: go install github.com/AndroidPoet/shipkit/cmd/shipkit@latest
+      - name: Install release tools
+        run: shipkit install
       - name: Release
         run: shipkit release "${{ inputs.platform }}"
 `
