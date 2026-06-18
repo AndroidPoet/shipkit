@@ -31,7 +31,6 @@ func Test_Run_installsMissingToolsWithHomebrew(t *testing.T) {
 	r := &fakeRunner{paths: map[string]string{"brew": "/opt/homebrew/bin/brew"}}
 
 	err := Run(context.Background(), r, &stdout, io.Discard)
-
 	if err != nil {
 		t.Fatal(err)
 	}

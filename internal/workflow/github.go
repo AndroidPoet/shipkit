@@ -55,9 +55,9 @@ jobs:
 
 func WriteGitHub(dir string) (string, error) {
 	workflowDir := filepath.Join(dir, ".github", "workflows")
-	if err := os.MkdirAll(workflowDir, 0755); err != nil {
+	if err := os.MkdirAll(workflowDir, 0o755); err != nil {
 		return "", err
 	}
 	path := filepath.Join(workflowDir, "mobile-release.yml")
-	return path, os.WriteFile(path, []byte(releaseWorkflow), 0644)
+	return path, os.WriteFile(path, []byte(releaseWorkflow), 0o644)
 }

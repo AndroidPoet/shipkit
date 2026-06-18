@@ -11,7 +11,6 @@ func Test_Run_printsSetupPlanFromAnswers(t *testing.T) {
 	var output bytes.Buffer
 
 	answers, err := Run(input, &output)
-
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -36,7 +35,6 @@ func Test_Run_usesDefaultsForBlankAnswers(t *testing.T) {
 	var output bytes.Buffer
 
 	answers, err := Run(input, &output)
-
 	if err != nil {
 		t.Fatal(err)
 	}

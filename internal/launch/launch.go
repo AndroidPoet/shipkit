@@ -40,7 +40,7 @@ func Evaluate(ctx context.Context, r runner.Runner) Report {
 	}
 
 	for _, result := range doctor.Check(ctx, r) {
-		detail := result.Message
+		var detail string
 		if result.Ready {
 			detail = "installed at " + result.Message
 		} else {

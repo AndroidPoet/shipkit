@@ -1,0 +1,61 @@
+---
+title: Agent Output
+description: Deterministic, parseable context for AI agents and scripts.
+---
+
+import { Callout } from 'nextra/components'
+
+# Agent Output
+
+Shipkit does not call an AI API. It does not need an API key. It does not send
+your project data anywhere. Instead, it exposes deterministic context that AI
+agents, scripts, and CI can parse.
+
+```bash
+shipkit agent --json
+```
+
+```json
+{
+  "schema_version": "1",
+  "goal": "Make mobile release setup deterministic for humans and AI agents.",
+  "tools": [
+    {
+      "name": "Google Play Console CLI",
+      "command": "gpc",
+      "installed": true,
+      "path": "/opt/homebrew/bin/gpc",
+      "install_url": "https://github.com/AndroidPoet/playconsole-cli"
+    }
+  ],
+  "config": {
+    "file": ".shipkit.yaml",
+    "present": false
+  },
+  "next_actions": [
+    "shipkit init \"My App\"",
+    "shipkit doctor",
+    "gpc setup --auto",
+    "rc login",
+    "asc auth login",
+    "shipkit ci github"
+  ]
+}
+```
+
+This is the useful AI integration: predictable CLI responses that external
+agents can understand and act on.
+
+## Security model
+
+- No AI API calls
+- No telemetry
+- No provider credentials stored by Shipkit
+- No hidden network calls in `shipkit agent --json`
+- Provider auth remains inside the provider CLIs
+- Generated CI workflows are visible files you can review
+
+<Callout type="info">
+  Because the output is deterministic, you can diff it across machines and in CI
+  to detect drift in a project's release tooling.
+</Callout>

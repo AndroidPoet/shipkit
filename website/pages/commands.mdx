@@ -1,0 +1,115 @@
+---
+title: Command Reference
+description: Every Shipkit command and what it does.
+---
+
+# Command Reference
+
+| Command | Purpose |
+| --- | --- |
+| `shipkit guide` | Interactive setup guide |
+| `shipkit agent [--json]` | AI-agent-friendly project context |
+| `shipkit install` | Install `gpc`, `rc`, and `asc` under the hood |
+| `shipkit init "My App"` | Create `.shipkit.yaml` |
+| `shipkit doctor [--json]` | Check local tool readiness |
+| `shipkit ci github` | Generate a GitHub Actions release workflow |
+| `shipkit release android` | Run the Android release flow through `gpc` |
+| `shipkit release ios` | Run the iOS release flow through `asc` |
+| `shipkit release all` | Run Android then iOS release flows |
+| `shipkit release ... --dry-run` | Print the provider commands without running them |
+| `shipkit launch-check [--json]` | Check launch readiness |
+| `shipkit version` | Print build metadata |
+
+## guide
+
+```bash
+shipkit guide
+```
+
+Interactive wizard. Answer a few questions and Shipkit prints the shortest setup
+path, the provider auth commands, and the release commands for your platforms.
+
+## install
+
+```bash
+shipkit install
+```
+
+Shipkit checks for the executable names `gpc`, `rc`, and `asc` first. If any are
+missing, it installs the underlying CLIs with Homebrew:
+
+```bash
+brew tap AndroidPoet/tap
+brew install playconsole-cli
+brew install revenuecat-cli
+brew install asc
+```
+
+Provider auth stays inside the provider CLIs:
+
+```bash
+gpc setup --auto
+rc login
+asc auth login
+```
+
+## init
+
+```bash
+shipkit init "LaunchKit"
+```
+
+Creates `.shipkit.yaml`. See [Configuration](/configuration).
+
+## doctor
+
+```bash
+shipkit doctor
+shipkit doctor --json
+```
+
+Checks that the provider CLIs are installed and reachable. Use `--json` for a
+machine-readable report.
+
+## release
+
+```bash
+shipkit release android   # gpc release --track internal
+shipkit release ios       # asc testflight upload
+shipkit release all       # Android then iOS
+```
+
+These are deliberately thin wrappers. Preview the exact provider commands
+without executing them:
+
+```bash
+shipkit release all --dry-run
+# [dry-run] gpc release --track internal
+# [dry-run] asc testflight upload
+```
+
+## launch-check
+
+```bash
+shipkit launch-check
+shipkit launch-check --json
+```
+
+See [Launch Readiness](/launch-readiness).
+
+## version
+
+```bash
+shipkit version
+# shipkit v0.1.0 (commit abc1234, built 2026-06-19)
+```
+
+## The providers behind Shipkit
+
+| You need | Shipkit uses | Binary |
+| --- | --- | --- |
+| Android release automation | `playconsole-cli` | `gpc` |
+| RevenueCat products, offerings, and paywalls | `revenuecat-cli` | `rc` |
+| App Store Connect and TestFlight | `App-Store-Connect-CLI` | `asc` |
+
+Shipkit owns the workflow. Provider CLIs own their APIs.

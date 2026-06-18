@@ -1,0 +1,31 @@
+# golangci-lint v2 configuration
+# Run: golangci-lint run ./...
+version: "2"
+
+linters:
+  default: none
+  enable:
+    - errcheck      # checks unchecked errors
+    - govet         # vet-style suspicious constructs
+    - ineffassign   # detects ineffectual assignments
+    - staticcheck   # staticcheck (includes gosimple + stylecheck)
+    - unused        # finds unused code
+  settings:
+    errcheck:
+      # Writing to stdout/stderr writers rarely fails and the error is
+      # not actionable in a CLI, so don't force checks on those calls.
+      exclude-functions:
+        - fmt.Fprint
+        - fmt.Fprintf
+        - fmt.Fprintln
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - std-error-handling
+
+formatters:
+  enable:
+    - gofumpt   # stricter gofmt
+  exclusions:
+    generated: lax

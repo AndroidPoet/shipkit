@@ -1,0 +1,74 @@
+---
+title: CI & Releases
+description: Generate a GitHub Actions release workflow and run release commands.
+---
+
+import { Callout } from 'nextra/components'
+
+# CI & Releases
+
+## Generate a workflow
+
+```bash
+shipkit ci github
+# Created .github/workflows/mobile-release.yml
+```
+
+The generated workflow:
+
+- installs Shipkit
+- installs the provider CLIs (`gpc`, `rc`, `asc`) via `shipkit install`
+- checks local release tooling
+- runs `shipkit release` for `android`, `ios`, or `all`
+
+It exposes a manual dispatch input so you can pick a platform from the UI:
+
+```yaml
+platform:
+  type: choice
+  options:
+    - all
+    - android
+    - ios
+```
+
+<Callout type="info">
+  The generated file is a normal, reviewable file in your repo. Read it, edit it,
+  and commit it like any other workflow.
+</Callout>
+
+## Release commands
+
+```bash
+shipkit release android
+shipkit release ios
+shipkit release all
+```
+
+Current mapping:
+
+```bash
+shipkit release android  # gpc release --track internal
+shipkit release ios      # asc testflight upload
+```
+
+Preview before you ship — `--dry-run` prints the exact provider commands without
+executing them:
+
+```bash
+shipkit release all --dry-run
+# [dry-run] gpc release --track internal
+# [dry-run] asc testflight upload
+```
+
+## Releasing Shipkit itself
+
+Tagging a version publishes GitHub release artifacts and updates the Homebrew tap:
+
+```bash
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+The release workflow needs a GitHub secret named `HOMEBREW_TAP_GITHUB_TOKEN`
+that can push to `AndroidPoet/homebrew-tap`.

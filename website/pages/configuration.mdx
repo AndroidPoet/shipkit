@@ -1,0 +1,71 @@
+---
+title: Configuration
+description: The .shipkit.yaml project config and what each field controls.
+---
+
+import { Callout } from 'nextra/components'
+
+# Configuration
+
+Shipkit reads a single project file, `.shipkit.yaml`, created by `shipkit init`.
+
+```bash
+shipkit init "LaunchKit"
+# Created .shipkit.yaml
+```
+
+## The file
+
+```yaml
+app:
+  name: "LaunchKit"
+  ios_bundle_id: "com.company.launchkit"
+  android_package: "com.company.launchkit"
+
+tools:
+  google_play: gpc
+  revenuecat: rc
+  app_store_connect: asc
+
+release:
+  android_track: internal
+  ios_testflight: true
+  revenuecat_enabled: true
+```
+
+## Fields
+
+| Field | Meaning |
+| --- | --- |
+| `app.name` | Human-readable app name |
+| `app.ios_bundle_id` | iOS bundle identifier |
+| `app.android_package` | Android application ID |
+| `tools.google_play` | Executable used for Play releases (`gpc`) |
+| `tools.revenuecat` | Executable used for RevenueCat (`rc`) |
+| `tools.app_store_connect` | Executable used for App Store Connect (`asc`) |
+| `release.android_track` | Default Play track (e.g. `internal`) |
+| `release.ios_testflight` | Whether iOS releases target TestFlight |
+| `release.revenuecat_enabled` | Whether RevenueCat checks apply |
+
+<Callout type="warning">
+  The generated bundle ID and package default to the `com.company.*` placeholder.
+  Update them before shipping — `shipkit launch-check` fails while the placeholder
+  is still in place.
+</Callout>
+
+The config starts small on purpose. It will grow into the source of truth for
+release tracks, TestFlight behavior, RevenueCat checks, metadata paths, and CI
+secret validation.
+
+## Environment & secrets
+
+Shipkit itself needs no secrets for local status checks. Provider tools may
+require their own credentials:
+
+| Tool | Typical auth command |
+| --- | --- |
+| `gpc` | `gpc setup --auto` |
+| `rc` | `rc login` |
+| `asc` | `asc auth login` |
+
+In CI, store provider credentials as GitHub Actions secrets.
