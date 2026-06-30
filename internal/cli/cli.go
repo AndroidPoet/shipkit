@@ -2,6 +2,7 @@ package cli
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"strings"
@@ -78,7 +79,7 @@ func runWith(ctx context.Context, r runner.Runner, args []string, stdin io.Reade
 	}
 }
 
-const releaseUsage = "usage: shipkit release android|ios|all [--dry-run]"
+var errReleaseUsage = errors.New("usage: shipkit release android|ios|all [--dry-run]")
 
 // releaseCommands maps a release target to the ordered provider commands it runs.
 // Keeping it as data (rather than inline calls) lets `--dry-run` preview the exact
@@ -94,7 +95,7 @@ func releaseCommands(target string) ([][]string, error) {
 		ios, _ := releaseCommands("ios")
 		return append(android, ios...), nil
 	default:
-		return nil, fmt.Errorf(releaseUsage)
+		return nil, errReleaseUsage
 	}
 }
 
@@ -108,7 +109,7 @@ func release(ctx context.Context, r runner.Runner, args []string, stdout, stderr
 		}
 	}
 	if len(targets) != 1 {
-		return fmt.Errorf(releaseUsage)
+		return errReleaseUsage
 	}
 
 	commands, err := releaseCommands(targets[0])

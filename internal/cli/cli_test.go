@@ -45,7 +45,6 @@ func Test_Run_releaseAllRunsAndroidThenIOS(t *testing.T) {
 	r := &fakeRunner{}
 
 	err := runWith(context.Background(), r, []string{"release", "all"}, strings.NewReader(""), &stdout, io.Discard, BuildInfo{})
-
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -60,7 +59,6 @@ func Test_Run_releaseDryRunExecutesNothing(t *testing.T) {
 	r := &fakeRunner{}
 
 	err := runWith(context.Background(), r, []string{"release", "all", "--dry-run"}, strings.NewReader(""), &stdout, io.Discard, BuildInfo{})
-
 	if err != nil {
 		t.Fatal(err)
 	}

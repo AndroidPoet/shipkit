@@ -1,0 +1,47 @@
+---
+title: Shipkit
+description: The release cockpit for mobile apps — one AI-agent-friendly command surface for Google Play, App Store Connect, RevenueCat, and CI release automation.
+---
+
+import { Hero } from '../components/Hero'
+import { Cards } from 'nextra/components'
+
+<Hero />
+
+**Shipkit** is a small, single-binary Go CLI that turns scattered mobile release
+work into one command surface. You run `shipkit` to install the provider CLIs,
+check readiness, generate CI, and ship — while the specialist tools keep owning
+their own APIs.
+
+```bash
+shipkit guide      # answer a few questions, get the shortest setup path
+shipkit install    # install gpc, rc, and asc under the hood
+shipkit doctor     # check that your tooling is ready
+shipkit agent --json   # deterministic context for AI agents and scripts
+```
+
+## Why Shipkit
+
+- **One workflow, many providers.** Android releases, iOS releases, and
+  subscriptions normally live in three different CLIs. Shipkit makes them feel
+  like one product.
+- **It does not replace the specialists.** Shipkit owns the workflow; the
+  provider CLIs (`gpc`, `rc`, `asc`) own their APIs. Drop down to them anytime.
+- **AI-agent-friendly by design.** `shipkit agent --json` emits deterministic,
+  parseable context — no AI API calls, no API key, no telemetry, no hidden
+  network calls.
+- **Small enough to audit.** A focused Go codebase with clear boundaries and no
+  duplicate provider clients.
+- **Repeatable releases.** `shipkit ci github` generates a reviewable GitHub
+  Actions workflow so every app ships the same way.
+
+## Explore the docs
+
+<Cards>
+  <Cards.Card title="Getting Started" href="/getting-started" arrow />
+  <Cards.Card title="Command Reference" href="/commands" arrow />
+  <Cards.Card title="Configuration" href="/configuration" arrow />
+  <Cards.Card title="CI & Releases" href="/ci" arrow />
+  <Cards.Card title="Launch Readiness" href="/launch-readiness" arrow />
+  <Cards.Card title="Agent Output" href="/agent-output" arrow />
+</Cards>

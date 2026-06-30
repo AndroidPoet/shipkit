@@ -1,0 +1,105 @@
+---
+title: Getting Started
+description: Install Shipkit and run your first guided mobile release setup.
+---
+
+import { Steps, Callout } from 'nextra/components'
+
+# Getting Started
+
+## Install
+
+<Steps>
+
+### Homebrew
+
+After the first tagged release:
+
+```bash
+brew tap AndroidPoet/tap
+brew install shipkit
+```
+
+### Go
+
+```bash
+go install github.com/AndroidPoet/shipkit/cmd/shipkit@latest
+```
+
+### Install script
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/AndroidPoet/shipkit/main/install.sh | sh
+```
+
+Install to a custom directory:
+
+```bash
+INSTALL_DIR="$HOME/.local/bin" sh -c "$(curl -fsSL https://raw.githubusercontent.com/AndroidPoet/shipkit/main/install.sh)"
+```
+
+</Steps>
+
+## Your first setup
+
+The fastest path is the guided flow. It asks a few questions and prints the
+exact commands to run.
+
+```bash
+shipkit guide
+```
+
+```text
+Shipkit Guide
+Answer a few questions and Shipkit will give you the shortest setup path.
+
+App name [My App]: LaunchKit
+Platforms (both/android/ios) [both]: both
+Use RevenueCat (yes/no) [yes]: yes
+CI provider (github/local) [github]: github
+
+Recommended setup
+  shipkit init "LaunchKit"
+  shipkit install
+  shipkit doctor
+  shipkit ci github
+```
+
+Or run the commands directly:
+
+<Steps>
+
+### Create your project config
+
+```bash
+shipkit init "LaunchKit"
+```
+
+This writes a small `.shipkit.yaml`. See [Configuration](/configuration).
+
+### Install the provider CLIs
+
+```bash
+shipkit install
+```
+
+Shipkit installs `gpc`, `rc`, and `asc` under the hood via Homebrew.
+
+### Check readiness
+
+```bash
+shipkit doctor
+```
+
+### Generate CI
+
+```bash
+shipkit ci github
+```
+
+</Steps>
+
+<Callout type="info">
+  Shipkit never stores provider credentials. After installing, authenticate each
+  provider CLI directly: `gpc setup --auto`, `rc login`, `asc auth login`.
+</Callout>

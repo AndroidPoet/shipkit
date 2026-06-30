@@ -10,6 +10,28 @@ permissions:
   contents: read
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+      - name: Check formatting (gofumpt)
+        run: |
+          go install mvdan.cc/gofumpt@latest
+          unformatted="$(gofumpt -l .)"
+          if [ -n "$unformatted" ]; then
+            echo "These files are not gofumpt-clean:"
+            echo "$unformatted"
+            exit 1
+          fi
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: latest
+
   test:
     runs-on: ubuntu-latest
     steps:
@@ -18,14 +40,13 @@ jobs:
         with:
           go-version-file: go.mod
           cache: true
-      - name: Check formatting
-        run: |
-          unformatted="$(gofmt -l .)"
-          if [ -n "$unformatted" ]; then
-            echo "These files are not gofmt-clean:"
-            echo "$unformatted"
-            exit 1
-          fi
       - run: go vet ./...
-      - run: go test ./...
+      - name: Test with coverage
+        run: go test ./... -coverprofile=coverage.out -covermode=atomic
+      - name: Coverage summary
+        run: go tool cover -func=coverage.out
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage.out
       - run: go build ./cmd/shipkit

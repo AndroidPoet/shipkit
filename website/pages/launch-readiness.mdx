@@ -1,0 +1,46 @@
+---
+title: Launch Readiness
+description: Answer one question — can this app ship today?
+---
+
+import { Callout } from 'nextra/components'
+
+# Launch Readiness
+
+```bash
+shipkit launch-check
+shipkit launch-check --json
+```
+
+It answers one question:
+
+```text
+Can this app ship today?
+```
+
+`launch-check` exits non-zero when the app is not ready, so it works as a CI gate.
+
+## Checks today
+
+Verifiable locally, in text or JSON:
+
+- provider CLIs (`gpc`, `rc`, `asc`) are installed
+- `.shipkit.yaml` exists and is readable
+- app name is set
+- iOS bundle ID is set and not the generated `com.company.*` placeholder
+- Android package is set and not the generated `com.company.*` placeholder
+
+## Planned checks
+
+These require store or network access:
+
+- Android package name matches Play Console setup
+- iOS bundle ID matches App Store Connect setup
+- RevenueCat product IDs exist for both stores
+- CI secrets are present
+- release notes, store metadata, and screenshots exist
+- internal track or TestFlight target is configured
+
+<Callout type="info">
+  Use `--json` to feed the readiness report straight into scripts and agents.
+</Callout>

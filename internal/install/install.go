@@ -2,6 +2,7 @@ package install
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 
@@ -24,7 +25,7 @@ var Tools = []Tool{
 
 func Run(ctx context.Context, r runner.Runner, stdout, stderr io.Writer) error {
 	if _, err := r.LookPath("brew"); err != nil {
-		return fmt.Errorf("Homebrew is required for automatic install. Install the tools manually from their GitHub repos, then run shipkit doctor")
+		return errors.New("homebrew is required for automatic install; install the tools manually from their GitHub repos, then run shipkit doctor")
 	}
 
 	for _, tool := range Tools {

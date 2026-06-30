@@ -100,5 +100,5 @@ func Write(dir string, cfg AppConfig) (string, error) {
 	} else if !os.IsNotExist(err) {
 		return path, err
 	}
-	return path, os.WriteFile(path, []byte(Render(cfg)), 0644)
+	return path, os.WriteFile(path, []byte(Render(cfg)), 0o644)
 }
